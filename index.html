@@ -8,55 +8,71 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>OSR System</h1>
+    <div class="app-container">
+        <!-- Compact Header -->
+        <header class="app-header">
+            <!-- Connection Toggle Button (shows when connected) -->
+            <button id="connection-toggle" class="connection-toggle hidden">
+                <span class="toggle-icon">⚙️</span> Channel Settings
+            </button>
+            
+            <!-- Connection Form - Collapsible panel -->
+            <div id="connection-panel" class="connection-panel">
+                <div class="connection-form">
+                    <input type="text" id="channel-name" placeholder="Enter Twitch username">
+                    <button id="start-btn">Start</button>
+                    <div id="connection-status">Disconnected</div>
+                </div>
+            </div>
         </header>
         
-        <div class="connection-form">
-            <input type="text" id="channel-name" placeholder="Enter Twitch username">
-            <button id="start-btn">Start</button>
-            <div id="connection-status">Disconnected</div>
-        </div>
-        
-        <!-- Tab Navigation -->
-        <div class="tabs">
-            <button class="tab-btn active" data-tab="chat">Chat</button>
-            <button class="tab-btn" data-tab="song-requests">Song Requests</button>
-        </div>
-        
-        <!-- Tab Content -->
-        <div class="tab-content">
-            <!-- Chat Tab -->
-            <div id="chat-tab" class="tab-pane active">
-                <div class="chat-container">
-                    <div id="chat-messages"></div>
-                </div>
-            </div>
-            
-            <!-- Song Requests Tab -->
-            <div id="song-requests-tab" class="tab-pane">
-                <div class="main-content">
-                    <div class="request-list-container">
-                        <div class="request-list-header">
-                            <h2>Request List</h2>
-                            <button id="clear-all-btn">Clear All</button>
-                        </div>
-                        <ul id="request-list">
-                            <!-- Song requests will appear here -->
-                        </ul>
-                    </div>
-                    
-                    <div class="song-details" id="song-details">
-                        <h3>Song Details</h3>
-                        <div id="song-info">
-                            <p>Click on a song to view details</p>
-                        </div>
-                    </div>
-                </div>
+        <!-- Fixed Tab Navigation -->
+        <div id="tabs-container" class="tabs-container">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="chat">Chat</button>
+                <button class="tab-btn" data-tab="song-requests">Song Requests</button>
             </div>
         </div>
         
+        <!-- Main Content Area - With full height chat -->
+        <div class="main-content-area">
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Chat Tab -->
+                <div id="chat-tab" class="tab-pane active">
+                    <div class="chat-container">
+                        <div id="chat-messages"></div>
+                    </div>
+                </div>
+                
+                <!-- Song Requests Tab -->
+                <div id="song-requests-tab" class="tab-pane">
+                    <!-- Redesigned for better mobile view - Vertical layout -->
+                    <div class="song-request-layout">
+                        <!-- Request List -->
+                        <div class="request-list-container">
+                            <div class="request-list-header">
+                                <h2>Request List</h2>
+                                <button id="clear-all-btn">Clear All</button>
+                            </div>
+                            <ul id="request-list">
+                                <!-- Song requests will appear here -->
+                            </ul>
+                        </div>
+                        
+                        <!-- Song Details - Now with position sticky on larger screens -->
+                        <div class="song-details" id="song-details">
+                            <h3>Song Details</h3>
+                            <div id="song-info">
+                                <p>Click on a song to view details</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Confirmation Modal -->
         <div id="confirm-modal" class="modal">
             <div class="modal-content">
                 <h3>Are you sure?</h3>
@@ -67,10 +83,6 @@
                 </div>
             </div>
         </div>
-        
-        <footer class="footer">
-            <p class="search-notice">To find song, use O.N.S.E.A.R.C.H. at <a href="https://onsearch.nnt.gg" target="_blank">https://onsearch.nnt.gg</a></p>
-        </footer>
     </div>
     
     <script src="script.js"></script>

@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const channelNameInput = document.getElementById('channel-name');
     const startBtn = document.getElementById('start-btn');
     const connectionStatus = document.getElementById('connection-status');
+    const connectionPanel = document.getElementById('connection-panel');
+    const connectionToggle = document.getElementById('connection-toggle');
     const requestList = document.getElementById('request-list');
     const songDetails = document.getElementById('song-details');
     const songInfo = document.getElementById('song-info');
@@ -14,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabPanes = document.querySelectorAll('.tab-pane');
     const chatContainer = document.querySelector('.chat-container');
+    const tabsContainer = document.getElementById('tabs-container');
+    const appHeader = document.querySelector('.app-header');
 
     // Variables
     let client = null;
@@ -22,6 +26,76 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedSongId = null;
     let userScrolledUp = false;
     let channelName = '';
+    let isMobileView = window.innerWidth < 768;
+
+    // Check for mobile view
+    function checkMobileView() {
+        isMobileView = window.innerWidth < 768;
+    }
+
+    // Calculate exact heights for perfect fit
+    function calculateHeights() {
+        // Get heights
+        const headerHeight = appHeader.offsetHeight;
+        const tabsHeight = tabsContainer.offsetHeight;
+        
+        // Set CSS variable for precise calculations
+        document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
+        document.documentElement.style.setProperty('--tabs-height', `${tabsHeight}px`);
+        
+        // Force layout recalculation
+        updateChatHeight();
+    }
+
+    // Listen for window resize
+    window.addEventListener('resize', () => {
+        checkMobileView();
+        calculateHeights();
+        handleResponsiveLayout();
+    });
+    
+    // Initial height calculation
+    calculateHeights();
+    
+    // Toggle connection panel visibility
+    connectionToggle.addEventListener('click', () => {
+        toggleConnectionPanel();
+        // Recalculate heights after animation completes
+        setTimeout(calculateHeights, 300); 
+    });
+    
+    function toggleConnectionPanel() {
+        connectionPanel.classList.toggle('collapsed');
+        
+        // Update the toggle button text based on state
+        if (connectionPanel.classList.contains('collapsed')) {
+            connectionToggle.innerHTML = '<span class="toggle-icon">⚙️</span> Show';
+        } else {
+            connectionToggle.innerHTML = '<span class="toggle-icon">⚙️</span> Hide';
+        }
+    }
+    
+    // Handle responsive layout adjustments
+    function handleResponsiveLayout() {
+        // If switching to song requests tab on mobile, enable overflow
+        if (isMobileView && document.querySelector('.tab-btn[data-tab="song-requests"]').classList.contains('active')) {
+            document.documentElement.style.overflow = 'auto';
+        } else if (document.querySelector('.tab-btn[data-tab="chat"]').classList.contains('active')) {
+            document.documentElement.style.overflow = 'hidden';
+        }
+        
+        // Update chat height to fill available space
+        updateChatHeight();
+    }
+    
+    // Update chat container height to fill available space
+    function updateChatHeight() {
+        // Let CSS handle this with flex: 1 and modern layout
+        // Force a reflow to ensure all dimensions are calculated
+        chatContainer.style.display = 'none';
+        chatContainer.offsetHeight; // Force reflow
+        chatContainer.style.display = 'flex';
+    }
 
     // Load songs data
     fetch('songs.json')
@@ -43,6 +117,17 @@ document.addEventListener('DOMContentLoaded', () => {
     clearAllBtn.addEventListener('click', showClearConfirmation);
     confirmYesBtn.addEventListener('click', clearAllRequests);
     confirmNoBtn.addEventListener('click', hideClearConfirmation);
+    
+    // Prevent touch events from causing accidental scrolls
+    document.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('touchstart', (e) => {
+            // Don't prevent default for all buttons as it prevents focus
+            if (!btn.classList.contains('tab-btn')) {
+                e.preventDefault();
+            }
+            btn.click();
+        });
+    });
     
     // Track scrolling in chat to determine auto-scroll behavior
     chatContainer.addEventListener('scroll', handleChatScroll);
@@ -72,10 +157,18 @@ document.addEventListener('DOMContentLoaded', () => {
             
         tabPane.classList.add('active');
         
-        // If switching to chat tab, scroll to bottom if user wasn't scrolled up
-        if (tabId === 'chat' && !userScrolledUp) {
-            scrollChatToBottom();
+        // Handle overflow setting based on tab
+        if (tabId === 'chat') {
+            document.documentElement.style.overflow = 'hidden';
+            if (!userScrolledUp) {
+                scrollChatToBottom();
+            }
+        } else {
+            // Only enable scroll for song request tab
+            document.documentElement.style.overflow = 'auto';
         }
+        
+        handleResponsiveLayout();
     }
     
     function handleChatScroll() {
@@ -103,6 +196,13 @@ document.addEventListener('DOMContentLoaded', () => {
             startBtn.textContent = 'Start';
             chatMessages.innerHTML = '';
             channelName = '';
+            
+            // Show connection panel and hide toggle button
+            connectionPanel.classList.remove('collapsed');
+            connectionToggle.classList.add('hidden');
+            
+            // Recalculate heights
+            setTimeout(calculateHeights, 100);
         } else {
             // Connect
             channelName = channelNameInput.value.trim().toLowerCase();
@@ -125,15 +225,26 @@ document.addEventListener('DOMContentLoaded', () => {
             // Connect to Twitch
             client.connect()
                 .then(() => {
-                    connectionStatus.textContent = 'Connected to ' + channelName;
+                    connectionStatus.textContent = channelName;
                     connectionStatus.className = 'connected';
                     startBtn.textContent = 'Disconnect';
+                    
+                    // Hide connection panel and show toggle button
+                    connectionPanel.classList.add('collapsed');
+                    connectionToggle.classList.remove('hidden');
+                    connectionToggle.innerHTML = '<span class="toggle-icon">⚙️</span> Show';
                     
                     // Add a system message to indicate connection
                     addChatMessage({
                         type: 'system',
                         message: `Connected to ${channelName}'s chat.`
                     });
+                    
+                    // Focus the chat tab after connecting
+                    switchTab('chat');
+                    
+                    // Recalculate heights after panel collapse
+                    setTimeout(calculateHeights, 300);
                 })
                 .catch(err => {
                     console.error('Error connecting to Twitch:', err);
@@ -344,6 +455,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveRequests();
                 renderRequestList();
             }
+            
+            // Notify about new request in requests tab via a subtle indicator
+            if (document.querySelector('.tab-btn[data-tab="chat"]').classList.contains('active')) {
+                document.querySelector('.tab-btn[data-tab="song-requests"]').classList.add('has-notification');
+            }
         } else {
             // Song not found
             addChatMessage({
@@ -384,6 +500,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (requestId) {
             console.log('Song selected:', requestId);
             selectSong(requestId);
+            
+            // On mobile, scroll to the details section
+            if (isMobileView) {
+                document.getElementById('song-details').scrollIntoView({ behavior: 'smooth' });
+            }
         }
     }
 
@@ -418,6 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Use the getArtworkUrl helper function
                 artwork.src = getArtworkUrl(request.song.image_url);
                 artwork.alt = request.song.title;
+                artwork.loading = "lazy"; // Lazy load images
                 artwork.onerror = function() {
                     this.src = 'placeholder.png'; // Default image if artwork not found
                     this.onerror = null;
@@ -441,6 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const doneBtn = document.createElement('button');
             doneBtn.className = 'done-btn';
             doneBtn.textContent = 'Done';
+            doneBtn.setAttribute('aria-label', 'Mark song as done');
             
             requestContent.appendChild(artworkContainer);
             requestContent.appendChild(songInfo);
@@ -452,6 +575,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         console.log('Request list rendered with', requests.length, 'items');
+        
+        // Remove notification indicator when viewing the requests tab
+        document.querySelector('.tab-btn[data-tab="song-requests"]').classList.remove('has-notification');
     }
 
     function selectSong(id) {
@@ -553,7 +679,7 @@ document.addEventListener('DOMContentLoaded', () => {
             detailsHTML = `
                 <div class="song-details-container">
                     <div class="song-details-artwork">
-                        <img src="${imageSrc}" alt="${song.title}" onerror="this.src='placeholder.png'; this.onerror=null;">
+                        <img src="${imageSrc}" alt="${song.title}" loading="lazy" onerror="this.src='placeholder.png'; this.onerror=null;">
                     </div>
                     <div class="song-details-content">
                         ${detailsHTML}
@@ -613,6 +739,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Initial render
+    // Initial setup
+    checkMobileView();
     renderRequestList();
+    calculateHeights();
+    updateChatHeight();
+    switchTab('chat'); // Ensure initial tab settings are applied
 });
