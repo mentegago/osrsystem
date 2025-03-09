@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSR System</title>
+    <script src="tmi.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>OSR System</h1>
+        </header>
+        
+        <div class="connection-form">
+            <input type="text" id="channel-name" placeholder="Enter Twitch username">
+            <button id="start-btn">Start</button>
+            <div id="connection-status">Disconnected</div>
+        </div>
+        
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="chat">Chat</button>
+            <button class="tab-btn" data-tab="song-requests">Song Requests</button>
+        </div>
+        
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Chat Tab -->
+            <div id="chat-tab" class="tab-pane active">
+                <div class="chat-container">
+                    <div id="chat-messages"></div>
+                </div>
+            </div>
+            
+            <!-- Song Requests Tab -->
+            <div id="song-requests-tab" class="tab-pane">
+                <div class="main-content">
+                    <div class="request-list-container">
+                        <div class="request-list-header">
+                            <h2>Request List</h2>
+                            <button id="clear-all-btn">Clear All</button>
+                        </div>
+                        <ul id="request-list">
+                            <!-- Song requests will appear here -->
+                        </ul>
+                    </div>
+                    
+                    <div class="song-details" id="song-details">
+                        <h3>Song Details</h3>
+                        <div id="song-info">
+                            <p>Click on a song to view details</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="confirm-modal" class="modal">
+            <div class="modal-content">
+                <h3>Are you sure?</h3>
+                <p>This will remove all song requests from the list.</p>
+                <div class="modal-buttons">
+                    <button id="confirm-yes">Yes, clear all</button>
+                    <button id="confirm-no">Cancel</button>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="footer">
+            <p class="search-notice">To find song, use O.N.S.E.A.R.C.H. at <a href="https://onsearch.nnt.gg" target="_blank">https://onsearch.nnt.gg</a></p>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
