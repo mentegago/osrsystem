@@ -101,7 +101,6 @@ h1 {
     transition: all 0.3s ease;
     overflow: hidden;
     max-height: 300px; /* Large enough for the form */
-    padding-bottom: env(safe-area-inset-bottom);
 }
 
 .connection-panel.collapsed {
@@ -280,6 +279,7 @@ button:hover, button:active {
     flex: 1;
     width: 100%;
     overflow-wrap: break-word;
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 .chat-message {
@@ -692,7 +692,7 @@ h2, h3 {
     /* Two column layout for song requests on desktop */
     .song-request-layout {
         flex-direction: row;
-        padding: var(--spacing-lg);
+        padding: var(--spacing-lg) var(--spacing-lg) calc(var(--spacing-lg) + env(safe-area-inset-bottom)) var(--spacing-lg);
     }
     
     .request-list-container {
