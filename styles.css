@@ -54,17 +54,14 @@ html, body {
     max-width: 100%;
     position: relative;
     overflow: hidden;
-    /* Remove global padding */
 }
 
 /* Header - Much more compact */
 .app-header {
-    padding: calc(env(safe-area-inset-top) + var(--spacing-lg)) var(--spacing-md) var(--spacing-md);
+    padding-top: env(safe-area-inset-top);
     background-color: var(--dark-surface);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     z-index: 10;
-    position: sticky;
-    top: 0;
 }
 
 h1 {
@@ -120,7 +117,6 @@ h1 {
     flex-direction: column;
     gap: var(--spacing-xs);
     padding: var(--spacing-xs) var(--spacing-md);
-    padding-top: calc(env(safe-area-inset-top) + var(--spacing-xs));
 }
 
 input, button {
